@@ -1,36 +1,33 @@
+from app.services.solicitud_factory import SolicitudFactory
 from sqlalchemy.orm import Session
 from app.domain.models import Solicitud, Estado
 from datetime import datetime, timedelta
+from app.domain.enums import EstadoSolicitud
 
 def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
-    """
-    Patrón Repository: Centraliza la lógica de creación en BD.
-    """
-    # 1. Buscamos el ID del estado inicial ("POR_APROBAR" o "PENDIENTE" según decidas)
+    # SMELL 4: Magic String ("POR_APROBAR")
     estado_inicial = db.query(Estado).filter(Estado.tipoEstado == "POR_APROBAR").first()
     
-    if not estado_inicial:
-        raise Exception("Error crítico: Los estados no están inicializados en la BD.")
+    # SMELL 2 y 3: Lógica dispersa y condicionales (Sin Strategy ni Factory)
+    if "Extemporánea" in tipo_tramite:
+        fecha_limite = datetime.now() + timedelta(hours=24)
+        prioridad_calc = "ALTA"
+    else:
+        fecha_limite = datetime.now() + timedelta(hours=72)
+        prioridad_calc = "NORMAL"
 
-    # 2. Regla de Negocio (SLA): Digamos que tienen 48 horas para resolverlo
-    fecha_limite = datetime.now() + timedelta(hours=48)
-
-    # 3. Creamos el objeto (Instancia de tu Entidad)
     nueva_solicitud = Solicitud(
         tipoSolicitud=tipo_tramite,
         solicitante=solicitante,
         slaObjetivo=fecha_limite,
-        prioridad="NORMAL",
-        estado_id=estado_inicial.idEstado, # Vinculamos la llave foránea
-        adjuntos=["http://mi-aws.com/doc.pdf"], # Dato de prueba
-        historial=[{"accion": "Creado por el Grupo 3", "fecha": str(datetime.now())}] # Dato de prueba
+        prioridad=prioridad_calc,
+        estado_id=estado_inicial.idEstado,
+        adjuntos=[],
+        historial=[]
     )
-
-    # 4. Guardamos en MySQL
     db.add(nueva_solicitud)
     db.commit()
-    db.refresh(nueva_solicitud) # Refrescamos para obtener el ID autogenerado
-    
+    db.refresh(nueva_solicitud)
     return nueva_solicitud
 
 def listar_solicitudes_por_aprobar(db: Session):
