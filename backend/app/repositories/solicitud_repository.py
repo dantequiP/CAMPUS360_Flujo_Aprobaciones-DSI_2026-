@@ -1,38 +1,39 @@
-from app.services.solicitud_factory import SolicitudFactory
 from sqlalchemy.orm import Session
+from datetime import datetime
+
 from app.domain.models import Solicitud, Estado
-from datetime import datetime, timedelta
 from app.domain.enums import EstadoSolicitud
+from app.services.solicitud_factory import SolicitudFactory
 
 def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
-    # SMELL 4: Magic String ("POR_APROBAR")
-    estado_inicial = db.query(Estado).filter(Estado.tipoEstado == "POR_APROBAR").first()
+    """Crea una solicitud delegando el ensamblaje y SLA al Patrón Factory."""
     
-    # SMELL 2 y 3: Lógica dispersa y condicionales (Sin Strategy ni Factory)
-    if "Extemporánea" in tipo_tramite:
-        fecha_limite = datetime.now() + timedelta(hours=24)
-        prioridad_calc = "ALTA"
-    else:
-        fecha_limite = datetime.now() + timedelta(hours=72)
-        prioridad_calc = "NORMAL"
+    # Usamos el Enum para evitar Magic Strings
+    estado_inicial = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.POR_APROBAR).first()
+    
+    if not estado_inicial:
+        raise Exception("Estados no inicializados en BD.")
 
-    nueva_solicitud = Solicitud(
-        tipoSolicitud=tipo_tramite,
+    # ¡LA MAGIA DE LOS PATRONES!
+    # Delegamos la lógica de instanciación y el cálculo matemático (Strategy) a la Fábrica
+    nueva_solicitud = SolicitudFactory.crear_solicitud(
+        tipo_tramite=tipo_tramite,
         solicitante=solicitante,
-        slaObjetivo=fecha_limite,
-        prioridad=prioridad_calc,
-        estado_id=estado_inicial.idEstado,
-        adjuntos=[],
-        historial=[]
+        estado_inicial_id=estado_inicial.idEstado
     )
+    
     db.add(nueva_solicitud)
     db.commit()
     db.refresh(nueva_solicitud)
+    
     return nueva_solicitud
+
 
 def listar_solicitudes_por_aprobar(db: Session):
     """Obtiene todas las solicitudes que están en la bandeja del Aprobador."""
-    estado_por_aprobar = db.query(Estado).filter(Estado.tipoEstado == "POR_APROBAR").first()
+    
+    # Aplicamos el Enum aquí también para evitar cadenas quemadas
+    estado_por_aprobar = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.POR_APROBAR).first()
     
     return db.query(Solicitud).filter(Solicitud.estado_id == estado_por_aprobar.idEstado).all()
 
