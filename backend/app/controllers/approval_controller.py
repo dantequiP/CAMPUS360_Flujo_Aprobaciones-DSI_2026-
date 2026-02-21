@@ -1,92 +1,75 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 from typing import List
-from app.domain.schemas import SolicitudDTO, DictamenInput, DerivacionInput
 
-# Controlador de Aprobaciones: Expone los endpoints REST para gestionar el ciclo de vida de las solicitudes.
-# Actúa como la Capa de Presentación, recibiendo peticiones HTTP y delegando a la Capa de Servicios.
+# Importamos nuestros esquemas (DTOs) y dependencias
+from app.domain.schemas import SolicitudDTO, DictamenInput
+from app.config.database import get_db
+from app.services.bandeja_facade import BandejaAprobacionFacade
+from app.repositories import solicitud_repository
 
 router = APIRouter()
 
 # ---------------------------------------------------------
-# CU-01: Listar Bandeja de Pendientes
+# CU-01: Listar Bandeja de Pendientes (USANDO FACADE)
 # ---------------------------------------------------------
 @router.get("/approvals/pending", response_model=List[SolicitudDTO])
-def listar_pendientes():
-    """Recupera la bandeja de entrada del Aprobador, priorizando las solicitudes por urgencia (SLA)."""
-    # Retornamos DATOS DUMMY (Stub) para simular la respuesta del backend en esta fase de prototipo.
-    return [
-        {
-            "id": 101,
-            "alumno": "Jose Perez",
-            "tipo_tramite": "Rectificación de Nota",
-            "estado": "POR APROBAR",
-            "prioridad": "ALTA",
-            "semaforo_sla": "ROJO"
-        },
-        {
-            "id": 102,
-            "alumno": "Ana Torres",
-            "tipo_tramite": "Matrícula Extemporánea",
-            "estado": "POR APROBAR",
-            "prioridad": "MEDIA",
-            "semaforo_sla": "VERDE"
-        }
-    ]
+def listar_pendientes(db: Session = Depends(get_db)):
+    """Recupera la bandeja real ordenada por prioridad y SLA."""
+    # Instanciamos nuestra Fachada y le pedimos la lista ya procesada
+    fachada = BandejaAprobacionFacade(db)
+    return fachada.obtener_bandeja_ordenada()
 
-# ---------------------------------------------------------
-# CU-05: Ver Detalle Consolidado
-# ---------------------------------------------------------
-@router.get("/approvals/{id}/detail")
-def ver_detalle_solicitud(id: int):
-    """Orquesta la obtención de datos externos (Alumno G3) y locales para mostrar la vista completa."""
-    return {
-        "solicitud_id": id,
-        "alumno_datos": {"nombre": "Jose Perez", "codigo": "20210001"},
-        "adjuntos": ["http://s3.aws.../certificado.pdf"],
-        "historial_observaciones": []
-    }
 
 # ---------------------------------------------------------
 # CU-02: Registrar Dictamen (Aprobar/Rechazar)
 # ---------------------------------------------------------
 @router.post("/approvals/{id}/verdict")
-def registrar_dictamen(id: int, payload: DictamenInput):
-    """Procesa la decisión final del Jefe, cambia el estado de la solicitud y dispara notificaciones."""
+def registrar_dictamen(id: int, payload: DictamenInput, db: Session = Depends(get_db)):
+    """Procesa la decisión final y la guarda físicamente en MySQL."""
+    
     if payload.decision not in ["APROBADO", "RECHAZADO", "OBSERVADO"]:
         raise HTTPException(status_code=400, detail="Estado no válido")
     
-    return {
-        "mensaje": f"Solicitud {id} procesada exitosamente",
-        "nuevo_estado": payload.decision,
-        "audit_log": "Registrado"
-    }
+    try:
+        # Usamos el repositorio para actualizar la BD
+        solicitud_actualizada = solicitud_repository.actualizar_estado(
+            db=db,
+            solicitud_id=id,
+            nuevo_estado_str=payload.decision,
+            comentario=payload.comentario
+        )
 
-# ---------------------------------------------------------
-# CU-04: Derivar a Jefatura (Secretario)
-# ---------------------------------------------------------
-@router.post("/workflow/{id}/escalate")
-def derivar_a_jefatura(id: int, payload: DerivacionInput):
-    """Permite al Secretario validar requisitos técnicos y elevar la solicitud a la bandeja de Jefatura."""
-    return {
-        "mensaje": "Derivación exitosa",
-        "estado_anterior": "PENDIENTE",
-        "estado_nuevo": "POR APROBAR",
-        "asignado_a": payload.area_destino
-    }
+        if not solicitud_actualizada:
+            raise HTTPException(status_code=404, detail="Solicitud no encontrada en MySQL")
 
-# ---------------------------------------------------------
-# CU-03: Consultar Historial
-# ---------------------------------------------------------
-@router.get("/approvals/history", response_model=List[SolicitudDTO])
-def consultar_historial():
-    """Consulta de auditoría para solicitudes finalizadas, permitiendo filtros por fecha y estado."""
-    return [
-        {
-            "id": 99,
-            "alumno": "Carlos Ruiz",
-            "tipo_tramite": "Reserva Lab",
-            "estado": "APROBADO",
-            "prioridad": "BAJA",
-            "semaforo_sla": "VERDE"
+        return {
+            "mensaje": f"Solicitud {id} procesada exitosamente",
+            "nuevo_estado": solicitud_actualizada.estado_actual.tipoEstado,
+            "audit_log": "Cambio registrado en MySQL"
         }
-    ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------
+# ENDPOINT TEMPORAL PARA PRUEBAS (FACTORY + STRATEGY)
+# ---------------------------------------------------------
+@router.post("/approvals/test-seed")
+def crear_solicitud_prueba(tipo_tramite: str = "Rectificación de Nota", alumno: str = "Gustavo", db: Session = Depends(get_db)):
+    """Crea una solicitud de prueba para verificar los patrones Creacional y de Comportamiento."""
+    try:
+        # Esto disparará el Factory y el Strategy internamente
+        nueva_solicitud = solicitud_repository.crear_solicitud(
+            db=db, 
+            tipo_tramite=tipo_tramite, 
+            solicitante=alumno
+        )
+        return {
+            "mensaje": "¡Solicitud creada en MySQL exitosamente!", 
+            "id_generado": nueva_solicitud.idSolicitud,
+            "prioridad_asignada": nueva_solicitud.prioridad, # Debería decir ALTA si es urgente
+            "estado": nueva_solicitud.estado_actual.tipoEstado
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
