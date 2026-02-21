@@ -6,7 +6,7 @@ from app.domain.enums import EstadoSolicitud
 
 def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
     # SMELL 4: Magic String ("POR_APROBAR")
-    estado_inicial = db.query(Estado).filter(Estado.tipoEstado == "POR_APROBAR").first()
+    estado_inicial = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.POR_APROBAR).first()
     
     # SMELL 2 y 3: Lógica dispersa y condicionales (Sin Strategy ni Factory)
     if "Extemporánea" in tipo_tramite:
