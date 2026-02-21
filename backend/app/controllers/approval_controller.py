@@ -1,92 +1,34 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 from typing import List
-from app.domain.schemas import SolicitudDTO, DictamenInput, DerivacionInput
+from datetime import datetime, timedelta
 
-# Controlador de Aprobaciones: Expone los endpoints REST para gestionar el ciclo de vida de las solicitudes.
-# Actúa como la Capa de Presentación, recibiendo peticiones HTTP y delegando a la Capa de Servicios.
+from app.domain.schemas import SolicitudDTO, DictamenInput
+from app.config.database import get_db
+from app.domain.models import Solicitud, Estado
+from app.repositories import solicitud_repository
 
 router = APIRouter()
 
-# ---------------------------------------------------------
-# CU-01: Listar Bandeja de Pendientes
-# ---------------------------------------------------------
 @router.get("/approvals/pending", response_model=List[SolicitudDTO])
-def listar_pendientes():
-    """Recupera la bandeja de entrada del Aprobador, priorizando las solicitudes por urgencia (SLA)."""
-    # Retornamos DATOS DUMMY (Stub) para simular la respuesta del backend en esta fase de prototipo.
-    return [
-        {
-            "id": 101,
-            "alumno": "Jose Perez",
-            "tipo_tramite": "Rectificación de Nota",
-            "estado": "POR APROBAR",
-            "prioridad": "ALTA",
-            "semaforo_sla": "ROJO"
-        },
-        {
-            "id": 102,
-            "alumno": "Ana Torres",
-            "tipo_tramite": "Matrícula Extemporánea",
-            "estado": "POR APROBAR",
-            "prioridad": "MEDIA",
-            "semaforo_sla": "VERDE"
-        }
-    ]
-
-# ---------------------------------------------------------
-# CU-05: Ver Detalle Consolidado
-# ---------------------------------------------------------
-@router.get("/approvals/{id}/detail")
-def ver_detalle_solicitud(id: int):
-    """Orquesta la obtención de datos externos (Alumno G3) y locales para mostrar la vista completa."""
-    return {
-        "solicitud_id": id,
-        "alumno_datos": {"nombre": "Jose Perez", "codigo": "20210001"},
-        "adjuntos": ["http://s3.aws.../certificado.pdf"],
-        "historial_observaciones": []
-    }
-
-# ---------------------------------------------------------
-# CU-02: Registrar Dictamen (Aprobar/Rechazar)
-# ---------------------------------------------------------
-@router.post("/approvals/{id}/verdict")
-def registrar_dictamen(id: int, payload: DictamenInput):
-    """Procesa la decisión final del Jefe, cambia el estado de la solicitud y dispara notificaciones."""
-    if payload.decision not in ["APROBADO", "RECHAZADO", "OBSERVADO"]:
-        raise HTTPException(status_code=400, detail="Estado no válido")
+def listar_pendientes(db: Session = Depends(get_db)):
+    # SMELL 1: Long Method. Todo está mezclado aquí.
+    estado_por_aprobar = db.query(Estado).filter(Estado.tipoEstado == "POR_APROBAR").first()
+    solicitudes = db.query(Solicitud).filter(Solicitud.estado_id == estado_por_aprobar.idEstado).all()
     
-    return {
-        "mensaje": f"Solicitud {id} procesada exitosamente",
-        "nuevo_estado": payload.decision,
-        "audit_log": "Registrado"
-    }
+    dto_list = []
+    for sol in solicitudes:
+        semaforo = "ROJO" if sol.slaObjetivo < datetime.now() else "VERDE"
+        dto = SolicitudDTO(
+            id=sol.idSolicitud,
+            alumno=sol.solicitante,
+            tipo_tramite=sol.tipoSolicitud,
+            estado="POR_APROBAR", # SMELL 4: Magic String
+            prioridad=sol.prioridad,
+            semaforo_sla=semaforo
+        )
+        dto_list.append(dto)
 
-# ---------------------------------------------------------
-# CU-04: Derivar a Jefatura (Secretario)
-# ---------------------------------------------------------
-@router.post("/workflow/{id}/escalate")
-def derivar_a_jefatura(id: int, payload: DerivacionInput):
-    """Permite al Secretario validar requisitos técnicos y elevar la solicitud a la bandeja de Jefatura."""
-    return {
-        "mensaje": "Derivación exitosa",
-        "estado_anterior": "PENDIENTE",
-        "estado_nuevo": "POR APROBAR",
-        "asignado_a": payload.area_destino
-    }
-
-# ---------------------------------------------------------
-# CU-03: Consultar Historial
-# ---------------------------------------------------------
-@router.get("/approvals/history", response_model=List[SolicitudDTO])
-def consultar_historial():
-    """Consulta de auditoría para solicitudes finalizadas, permitiendo filtros por fecha y estado."""
-    return [
-        {
-            "id": 99,
-            "alumno": "Carlos Ruiz",
-            "tipo_tramite": "Reserva Lab",
-            "estado": "APROBADO",
-            "prioridad": "BAJA",
-            "semaforo_sla": "VERDE"
-        }
-    ]
+    priority_order = {"ALTA": 1, "NORMAL": 2, "BAJA": 3}
+    dto_list.sort(key=lambda x: (priority_order.get(x.prioridad, 99), x.semaforo_sla == "VERDE"))
+    return dto_list
