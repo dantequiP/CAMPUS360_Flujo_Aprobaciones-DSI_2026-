@@ -13,14 +13,13 @@ class SolicitudFactory:
         else:
             estrategia = TramiteRegularStrategy()
 
-        # Ensamblamos la entidad
+        # Ensamblamos la entidad (Ya no pasamos el campo historial)
         nueva_solicitud = Solicitud(
             tipoSolicitud=tipo_tramite,
             solicitante=solicitante,
             estado_id=estado_inicial_id,
-            slaObjetivo=estrategia.calcular_sla(),      # <--- Usamos la estrategia
-            prioridad=estrategia.obtener_prioridad(),   # <--- Usamos la estrategia
-            adjuntos=[],
-            historial=[]
+            slaObjetivo=estrategia.calcular_sla(),
+            prioridad=estrategia.obtener_prioridad(),
+            adjuntos=[] 
         )
         return nueva_solicitud

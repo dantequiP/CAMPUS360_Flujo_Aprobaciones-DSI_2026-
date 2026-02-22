@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
+from app.domain.schemas import DerivacionInput
 
 # Importamos nuestros esquemas (DTOs) y dependencias
 from app.domain.schemas import SolicitudDTO, DictamenInput
@@ -50,6 +51,74 @@ def registrar_dictamen(id: int, payload: DictamenInput, db: Session = Depends(ge
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------
+# CU-03: Consultar Historial de Decisiones
+# ---------------------------------------------------------
+@router.get("/approvals/history")
+def consultar_historial(db: Session = Depends(get_db)):
+    """Lista las solicitudes previamente atendidas (Aprobadas, Rechazadas, Observadas)."""
+    solicitudes_historicas = solicitud_repository.consultar_historial(db)
+    
+    # Formateamos la salida rápidamente 
+    return [
+        {
+            "id": sol.idSolicitud, 
+            "tramite": sol.tipoSolicitud, 
+            "estado_final": sol.estado_actual.tipoEstado, 
+            "alumno": sol.solicitante,
+            "fecha_decision": sol.historial_decisiones[-1].fecha if sol.historial_decisiones else None
+        } 
+        for sol in solicitudes_historicas
+    ]
+
+
+# ---------------------------------------------------------
+# CU-04: Evaluar Solicitud (Exclusivo Secretario)
+# ---------------------------------------------------------
+@router.post("/workflow/{id}/escalate")
+def evaluar_secretaria(id: int, payload: DerivacionInput, db: Session = Depends(get_db)):
+    """Secretario revisa requisitos: Deriva (POR APROBAR) u Observa (OBSERVADO)."""
+    try:
+        solicitud = solicitud_repository.derivar_solicitud(db, id, payload)
+        if not solicitud:
+            raise HTTPException(status_code=404, detail="Solicitud no encontrada en BD.")
+        
+        accion = "derivada a la Jefatura" if payload.checklist_valido else "observada y devuelta al alumno"
+        
+        return {
+            "mensaje": f"Solicitud {id} validada y {accion} exitosamente.",
+            "nuevo_estado": solicitud.estado_actual.tipoEstado
+        }
+    except Exception as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+# ---------------------------------------------------------
+# CU-05: Ver Detalle Consolidado
+# ---------------------------------------------------------
+@router.get("/approvals/{id}/detail")
+def ver_detalle_solicitud(id: int, db: Session = Depends(get_db)):
+    """Obtiene la información detallada de una solicitud específica y su auditoría."""
+    solicitud = solicitud_repository.obtener_detalle(db, id)
+    if not solicitud:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada.")
+    
+    return {
+        "id": solicitud.idSolicitud,
+        "alumno": solicitud.solicitante,
+        "tramite": solicitud.tipoSolicitud,
+        "estado_actual": solicitud.estado_actual.tipoEstado,
+        "prioridad": solicitud.prioridad,
+        "fecha_creacion": solicitud.fechaCreacion,
+        "sla_objetivo": solicitud.slaObjetivo,
+        # Mostramos el historial extrayéndolo de las tablas relacionales
+        "auditoria_decisiones": [
+            {"accion": h.accion, "comentario": h.comentario, "fecha": h.fecha, "actor": h.usuario_id}
+            for h in solicitud.historial_decisiones
+        ]
+    }
 
 
 # ---------------------------------------------------------
