@@ -1,36 +1,30 @@
-from pydantic import BaseModel, validator
-from typing import Optional
-
-# DTOs (Data Transfer Objects): Definen estrictamente qué datos entran y salen de la API.
-# Actúan como contrato de interfaz y barrera de validación automática.
+from pydantic import BaseModel, field_validator, ConfigDict, ValidationInfo
 
 # --- RESPUESTAS (OUTPUTS) ---
 class SolicitudDTO(BaseModel):
     """Estructura de datos pública enviada al cliente (Frontend) para listar solicitudes."""
     id: int
-    alumno: str          # Mapeado desde 'solicitante'
-    tipo_tramite: str    # Mapeado desde 'tipoSolicitud'
-    estado: str          # Mapeado desde la relación con 'Estado'
-    prioridad: str       # Calculada por la Estrategia (ALTA/NORMAL)
-    semaforo_sla: str    # Indicador visual de urgencia (ROJO/VERDE)
+    alumno: str          
+    tipo_tramite: str    
+    estado: str          
+    prioridad: str       
+    semaforo_sla: str    
 
-    class Config:
-        from_attributes = True # Permite a Pydantic leer datos directamente de modelos SQLAlchemy
+    # Sintaxis actualizada para Pydantic V2
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- PETICIONES (INPUTS) ---
 class DictamenInput(BaseModel):
     """Payload requerido para que un Aprobador registre su decisión final sobre un trámite."""
-    decision: str       # Valores esperados: "APROBADO", "RECHAZADO", "OBSERVADO"
-    comentario: str = "" # Por defecto vacío para poder validarlo dinámicamente
+    decision: str       
+    comentario: str = "" 
     
-    # Validaciones Automáticas (Reglas de Negocio)
-    @validator('comentario')
-    def validar_comentario_obligatorio(cls, v, values):
-        # Extraemos la decisión que el usuario envió en el JSON
-        decision = values.get('decision')
-        
-        # RN3: Si la decisión es negativa o devuelve el trámite, exigimos justificación
+    # Sintaxis actualizada para Pydantic V2
+    @field_validator('comentario')
+    @classmethod
+    def validar_comentario_obligatorio(cls, v: str, info: ValidationInfo):
+        decision = info.data.get('decision')
         if decision in ['OBSERVADO', 'RECHAZADO']:
             if not v or len(v.strip()) < 5:
                 raise ValueError("RN3: El comentario es obligatorio y debe explicar el motivo (mín. 5 caracteres).")
@@ -40,13 +34,14 @@ class DictamenInput(BaseModel):
 class DerivacionInput(BaseModel):
     """Payload exclusivo para el perfil Secretario al evaluar trámites PENDIENTES."""
     area_destino: str
-    checklist_valido: bool # True = Pasa a POR_APROBAR / False = Devuelto como OBSERVADO
-    comentario: str = ""   # Obligatorio si checklist_valido es False
+    checklist_valido: bool 
+    comentario: str = ""   
 
-    @validator('comentario')
-    def validar_comentario_secretario(cls, v, values):
-        checklist = values.get('checklist_valido')
-        # RN3: Si el secretario marca el checklist como inválido, DEBE justificarlo
+    # Sintaxis actualizada para Pydantic V2
+    @field_validator('comentario')
+    @classmethod
+    def validar_comentario_secretario(cls, v: str, info: ValidationInfo):
+        checklist = info.data.get('checklist_valido')
         if checklist is False:
             if not v or len(v.strip()) < 5:
                 raise ValueError("RN3: El comentario es obligatorio al observar por falta de requisitos.")

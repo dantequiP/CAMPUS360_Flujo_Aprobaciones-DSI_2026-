@@ -26,3 +26,12 @@ class TramiteUrgenteStrategy(SlaStrategy):
     
     def obtener_prioridad(self) -> str:
         return "ALTA"
+    
+class SlaStrategyResolver:
+    """Clase encargada de resolver e instanciar la estrategia adecuada según el trámite."""
+    
+    @staticmethod
+    def resolver(tipo_tramite: str) -> SlaStrategy:
+        if "Extemporánea" in tipo_tramite or "Urgente" in tipo_tramite:
+            return TramiteUrgenteStrategy()
+        return TramiteRegularStrategy()

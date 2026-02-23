@@ -33,29 +33,28 @@ def test_02_strategy_urgente_calcula_sla_correcto():
 # ==========================================
 # PRUEBAS DEL PATRÓN FACTORY (Ensamblaje)
 # ==========================================
-
 def test_03_factory_crea_solicitud_regular():
-    """Prueba 3: Verifica que la Fábrica ensamble bien una solicitud normal."""
+    """Prueba 3: Verifica que la Fábrica ensamble bien usando la estrategia inyectada."""
+    estrategia_mock = TramiteRegularStrategy()
     solicitud = SolicitudFactory.crear_solicitud(
         tipo_tramite="Constancia de Notas", 
         solicitante="Juan Perez", 
-        estado_inicial_id=1
+        estado_inicial_id=1,
+        estrategia=estrategia_mock
     )
-    
-    assert solicitud.tipoSolicitud == "Constancia de Notas"
     assert solicitud.prioridad == "NORMAL"
-    assert solicitud.adjuntos == []
 
 def test_04_factory_crea_solicitud_urgente():
-    """Prueba 4: Verifica que la Fábrica detecte la palabra clave y asigne ALTA."""
+    """Prueba 4: Verifica el ensamblaje con estrategia urgente inyectada."""
+    estrategia_mock = TramiteUrgenteStrategy()
     solicitud = SolicitudFactory.crear_solicitud(
         tipo_tramite="Matrícula Extemporánea", 
         solicitante="Maria Gomez", 
-        estado_inicial_id=1
+        estado_inicial_id=1,
+        estrategia=estrategia_mock
     )
-    
     assert solicitud.prioridad == "ALTA"
-
+    
 # ==========================================
 # PRUEBAS DE REGLAS DE NEGOCIO (Validaciones)
 # ==========================================

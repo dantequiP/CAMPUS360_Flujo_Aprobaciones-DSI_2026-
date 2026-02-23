@@ -1,23 +1,33 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.domain.schemas import DerivacionInput
+
 # Importamos los nuevos modelos relacionales
 from app.domain.models import Solicitud, Estado, HistorialDecision, LogAuditoria
 from app.domain.enums import EstadoSolicitud
+
+# Importamos la Fábrica y el nuevo Resolver (Para cumplir SOLID)
 from app.services.solicitud_factory import SolicitudFactory
+from app.services.sla_strategy import SlaStrategyResolver
 
 def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
-    """Crea una solicitud delegando el ensamblaje y SLA al Patrón Factory."""
+    """Crea una solicitud usando el Resolver y el Factory (Cumpliendo OCP y DIP)."""
     
+    # El flujo real del módulo empieza en PENDIENTE
     estado_inicial = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.PENDIENTE).first()
     
     if not estado_inicial:
         raise Exception("Estados no inicializados en BD.")
 
+    # 1. Resolvemos qué estrategia usar de forma externa (Inversión de Dependencias)
+    estrategia_seleccionada = SlaStrategyResolver.resolver(tipo_tramite)
+
+    # 2. Delegamos el ensamblaje a la Fábrica inyectando la estrategia resuelta
     nueva_solicitud = SolicitudFactory.crear_solicitud(
         tipo_tramite=tipo_tramite,
         solicitante=solicitante,
-        estado_inicial_id=estado_inicial.idEstado
+        estado_inicial_id=estado_inicial.idEstado,
+        estrategia=estrategia_seleccionada
     )
     
     db.add(nueva_solicitud)
@@ -73,6 +83,7 @@ def actualizar_estado(db: Session, solicitud_id: int, nuevo_estado_str: str, com
     db.refresh(solicitud)
     
     return solicitud
+
 
 def derivar_solicitud(db: Session, solicitud_id: int, payload: DerivacionInput):
     """RN-06: El Secretario evalúa la solicitud PENDIENTE (Deriva u Observa)."""
