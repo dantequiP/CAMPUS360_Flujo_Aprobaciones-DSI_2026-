@@ -1,8 +1,16 @@
+"""
+Capa de Servicios: Lógica de Comportamiento (Strategy Pattern).
+Aplica el Patrón Strategy para el cálculo dinámico de Acuerdos de Nivel 
+de Servicio (SLA) y prioridades. Garantiza el principio Abierto/Cerrado (OCP).
+"""
 from datetime import datetime, timedelta
 from abc import ABC, abstractmethod
 
-# 1. La Interfaz (Clase Base)
 class SlaStrategy(ABC):
+    """
+    Contrato base (Interfaz). Define la familia de algoritmos 
+    intercambiables para el cálculo de SLAs operativos.
+    """
     @abstractmethod
     def calcular_sla(self) -> datetime:
         pass
@@ -11,25 +19,30 @@ class SlaStrategy(ABC):
     def obtener_prioridad(self) -> str:
         pass
 
-# 2. Estrategia 1: Trámites Regulares (ej. Rectificación de Nota)
+
 class TramiteRegularStrategy(SlaStrategy):
+    """Estrategia Concreta: Trámites estándar con SLA de 72 horas (Prioridad NORMAL)."""
     def calcular_sla(self) -> datetime:
-        return datetime.now() + timedelta(hours=72) # 3 días
+        return datetime.now() + timedelta(hours=72)
     
     def obtener_prioridad(self) -> str:
         return "NORMAL"
 
-# 3. Estrategia 2: Trámites Urgentes (ej. Matrícula Extemporánea)
+
 class TramiteUrgenteStrategy(SlaStrategy):
+    """Estrategia Concreta: Trámites críticos con SLA de 24 horas (Prioridad ALTA)."""
     def calcular_sla(self) -> datetime:
-        return datetime.now() + timedelta(hours=24) # 1 día
+        return datetime.now() + timedelta(hours=24)
     
     def obtener_prioridad(self) -> str:
         return "ALTA"
     
+
 class SlaStrategyResolver:
-    """Clase encargada de resolver e instanciar la estrategia adecuada según el trámite."""
-    
+    """
+    Inyector de Dependencias Estático. Desacopla la selección de la estrategia 
+    del Factory, asegurando que la infraestructura cumpla con OCP y DIP.
+    """
     @staticmethod
     def resolver(tipo_tramite: str) -> SlaStrategy:
         if "Extemporánea" in tipo_tramite or "Urgente" in tipo_tramite:
