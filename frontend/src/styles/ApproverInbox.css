@@ -1,0 +1,221 @@
+.inbox-container { padding: 10px; }
+
+.inbox-header h1 { font-size: 1.8rem; color: #1e293b; margin: 0; }
+.inbox-header p { color: #64748b; margin-top: 5px; }
+
+/* Botones de Vista */
+.view-modes { display: flex; gap: 10px; margin: 20px 0; }
+.mode-btn { padding: 6px 15px; border-radius: 6px; border: 1px solid #e2e8f0; background: white; cursor: pointer; font-size: 0.85rem; }
+.mode-btn.active { background: #1e293b; color: white; }
+
+/* Filtros */
+.filters-panel { background: white; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px; }
+.filter-row { display: flex; gap: 15px; }
+.filter-row select, .search-input { padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; flex: 1; }
+.search-input { flex: 2; }
+
+/* Tabla Profesional */
+.main-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; font-size: 0.9rem; }
+.main-table th { background: #f8fafc; padding: 15px; text-align: left; color: #475569; border-bottom: 2px solid #f1f5f9; }
+.main-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+
+/* Etiquetas de Estado */
+.tag-status { padding: 4px 10px; border-radius: 6px; font-weight: 500; font-size: 0.75rem; }
+.tag-status.por-aprobar { background: #e0e7ff; color: #4338ca; }
+.tag-status.pendiente { background: #dbeafe; color: #1d4ed8; }
+.tag-status.observada { background: #fef3c7; color: #92400e; }
+
+/* Etiquetas de Prioridad */
+.tag-prio { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
+.tag-prio.alta { background: #fee2e2; color: #b91c1c; }
+.tag-prio.media { background: #ffedd5; color: #9a3412; }
+
+.actions-cell { display: flex; gap: 8px; }
+.actions-cell button { border: none; background: #f8fafc; cursor: pointer; padding: 5px; border-radius: 4px; }
+
+/* Contenedor principal de filtros */
+.filters-panel {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 25px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.filters-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  color: #1e293b;
+}
+
+/* Fila superior: Buscador y Selectores */
+.filter-row-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.search-box {
+  flex: 1; /* El buscador ocupa el espacio sobrante */
+  min-width: 250px;
+}
+
+.search-input, .filter-select, .date-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.filter-select {
+  flex: 0 1 180px; /* Tamaño fijo para los selectores */
+  cursor: pointer;
+}
+
+/* Fila inferior: Fechas y Botón */
+.filter-row-secondary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.date-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.date-input {
+  width: auto;
+}
+
+.btn-clear-filters {
+  background-color: transparent;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-clear-filters:hover {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+/* Contenedor principal del veredicto histórico */
+.audit-box-g4 {
+  background-color: #f8fafc; /* Un gris muy suave y profesional */
+  border-left: 5px solid #6366f1; /* Borde azul índigo que denota autoridad */
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Título de la sección */
+.audit-box-g4 h3 {
+  color: #1e293b;
+  font-size: 1.1rem;
+  margin-top: 0;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audit-box-g4 h3::before {
+  content: "📝"; /* Icono de nota técnica */
+}
+
+/* Estilo para la etiqueta del comentario */
+.audit-box-g4 strong {
+  color: #475569;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* El texto del comentario propiamente dicho */
+.audit-box-g4 p:last-child {
+  color: #334155;
+  line-height: 1.6;
+  font-style: italic; /* Lo hace ver como una cita o declaración */
+  margin-top: 8px;
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* Contenedor de la grilla */
+.request-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Tarjetas de información individual */
+.info-card {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-card label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.info-card p {
+  font-size: 1rem;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Resaltado del código SOL-X */
+.highlight-text {
+  color: #4f46e5 !important;
+  font-weight: 700;
+}
+
+/* Etiquetas de archivos */
+.file-tag {
+  display: inline-block;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-right: 5px;
+  border: 1px solid #cbd5e1;
+}
+
+/* Caja de motivo */
+.motive-box {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+  margin-top: 10px;
+  line-height: 1.6;
+}

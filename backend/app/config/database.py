@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Cadena de conexión a MySQL local
 # Formato: mysql+pymysql://usuario:password@localhost:3306/nombre_bd
-SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:1234@localhost:3306/campus360"
+SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:@localhost:3306/campus360"
 
 # Motor de conexión
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
