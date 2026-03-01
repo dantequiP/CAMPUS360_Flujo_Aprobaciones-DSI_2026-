@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
+import { approvalService } from '../services/approvalService';
+import { ROLES, ACTIONS } from '../constants/appConstants';
+import RequestInfo from '../components/approval/RequestInfo';
 
 const RequestDetail = ({ selectedRequest, setSelectedRequest, userRole,isReadOnly }) => {
 
-
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [comment, setComment] = useState('');
+  const API_BASE_URL = 'http://localhost:8000/api/v1';
 
+  
   // 2. LOG DE SEGURIDAD (Para que veas en la consola qué llega)
   console.log("Datos recibidos en el Detalle:", selectedRequest);
 
@@ -19,56 +24,27 @@ const RequestDetail = ({ selectedRequest, setSelectedRequest, userRole,isReadOnl
     );
   }
 
-  const handleDecision = async (tipo) => {
-    // 1. Definir URL y Payload según el rol
-    let url = "";
-    let payload = {};
+const handleDecision = async (tipo) => {
+  setIsProcessing(true);
+  try {
+    const result = await approvalService.submitVerdict(
+      selectedRequest.id,
+      userRole,
+      tipo,
+      comment
+    );
 
-    if (userRole === 'secretaria') {
-      // Endpoint de Escalado
-      url = `http://localhost:8000/api/v1/workflow/${selectedRequest.id}/escalate`;
-      payload = {
-        area_destino: tipo === 'Derivado' ? "Jefatura" : "Alumno",
-        checklist_valido: tipo === 'Derivado',
-        comentario: comment
-      };
-    } else {
-      // Endpoint de Dictamen
-      url = `http://localhost:8000/api/v1/approvals/${selectedRequest.id}/verdict`;
-      payload = {
-        // Mapeo exacto a DictamenInput (Importante: Mayúsculas)
-        decision: tipo.toUpperCase() === 'OBSERVADO' ? 'OBSERVADO' : 
-                  tipo.toUpperCase() === 'RECHAZADO' ? 'RECHAZADO' : 'APROBADO',
-        comentario: comment
-      };
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST', // Tus endpoints son POST
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Error en el servidor");
-      }
-
-      const result = await response.json();
-      alert(`${result.mensaje}`);
-      
-      // 2. Cerrar y Volver
-      setIsModalOpen(false);
-      setSelectedRequest(null); // Esto nos regresa a la bandeja automáticamente
-      
-    } catch (err) {
-      console.error("Error en la conexión:", err);
-      alert(`Error: ${err.message}`);
-    }
+    alert(`${result.mensaje}`);
+    setIsModalOpen(false);
+    setSelectedRequest(null);
+    
+  } catch (err) {
+    console.error("Error en la conexión:", err);
+    alert(`Error: ${err.message}`);
+  }finally {
+    setIsProcessing(false);
   };
-
-  // 1. Añadimos el nuevo estado al inicio de los Hooks  react Hooks "useState" is called condinionatlly. ruct hooks must be called in the exacted same order in the evert component render
+};
 
 const isCommentValid = comment.trim().length >= 10;
 
@@ -82,7 +58,6 @@ return (
       <div className="header-titles">
         <div className="id-status-row">
           <span className="request-id">SOL-{selectedRequest.id}</span>
-          // Busca esta línea en el Header de RequestDetail.jsx
           <span className={`tag-status ${(selectedRequest.estado_final || selectedRequest.estado)?.toLowerCase()}`}>
             {(selectedRequest.estado_final || selectedRequest.estado)?.replace('_', ' ') || 'PROCESANDO'}
           </span>
@@ -91,18 +66,15 @@ return (
       </div>
 
       {!isReadOnly && (
-        <div className="header-actions">
-          <button 
-            className="btn-action-main" 
-            onClick={() => setIsModalOpen(true)}
-          >
-            {userRole === 'secretaria' ? '⚙️ Gestionar Derivación' : '⚖️ Tomar Decisión'}
-          </button>
-        </div>
-      )}
+          <div className="header-actions">
+            <button className="btn-action-main" onClick={() => setIsModalOpen(true)}>
+              {userRole === ROLES.SECRETARIA ? '⚙️ Gestionar Derivación' : '⚖️ Tomar Decisión'}
+            </button>
+          </div>
+        )}
     </header>
 
-    {isReadOnly && (
+    {(isReadOnly || selectedRequest.comentario) && (
       <div className="audit-box-g4">
         <h3>Resumen del Veredicto Técnico</h3>
         <p><strong>Comentario Registrado:</strong></p>
@@ -126,7 +98,7 @@ return (
           />
 
           <div className="action-buttons-group">
-          {userRole === 'secretaria' ? (
+          {userRole === ROLES.SECRETARIA ? (
             /* 1. SECRETARÍA: Mantiene Derivar y Observar */
             <>
               <button className="btn-main approve" onClick={() => handleDecision('Derivado')}>
@@ -143,7 +115,7 @@ return (
           ) : (
             /* 2. APROBADOR: Solo Aprobar o Rechazar (Eliminamos 'Observar') */
             <>
-              <button className="btn-main approve" onClick={() => handleDecision('Aprobado')}>
+              <button className="btn-main approve" onClick={() => handleDecision('Aprobado')}disabled={isProcessing}>
                 <span>✅</span> Aprobar
               </button>
               <button 
@@ -156,7 +128,7 @@ return (
               <button 
                 className="btn-main reject" 
                 onClick={() => handleDecision('Rechazado')}
-                disabled={!isCommentValid}
+                disabled={isProcessing || !isCommentValid}
               >
                 <span>🚫</span> Rechazar
               </button>
@@ -170,56 +142,7 @@ return (
       </div>
     )}
 
-      {selectedRequest.comentario && (
-      <div className="audit-box-g4">
-        <h3>Resumen del Veredicto</h3>
-        <p><strong>Comentario registrado:</strong></p>
-        <p>{selectedRequest.comentario}</p>
-      </div>
-    )}
-
-      
-
-      <div className="data-grid-container">
-        <h2 className="section-title">Información del Expediente</h2>
-        
-        <div className="request-info-grid">
-          {/* 1. Código de Solicitud mejorado */}
-          <div className="info-card">
-            <label>Código de Solicitud</label>
-            <p className="highlight-text">SOL-{selectedRequest.id}</p>
-          </div>
-
-          {/* 2. Solicitante con fallback para nombres de campos */}
-          <div className="info-card">
-            <label>Solicitante</label>
-            <p>{selectedRequest.alumno || selectedRequest.solicitante}</p>
-          </div>
-
-          {/* 3. Fecha de Ingreso formateada */}
-          <div className="info-card">
-            <label>Fecha de Ingreso</label>
-            <p>{selectedRequest.fecha_creacion || selectedRequest.fechaCreacion || '2026-02-21'}</p>
-          </div>
-
-          {/* 4. Documentos Adjuntos (Simulado por ahora) */}
-          <div className="info-card">
-            <label>Documentos Adjuntos</label>
-            <div className="attachment-list">
-              <span className="file-tag">fut_firmado.pdf</span>
-              <span className="file-tag">reporte_notas.pdf</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 5. Descripción/Motivo en ancho completo */}
-        <div className="description-section">
-          <label>Descripción / Motivo del Trámite</label>
-          <div className="motive-box">
-            {selectedRequest.motivo || "Solicitud tramitada según normativa vigente de la UNMSM - FISI."}
-          </div>
-        </div>
-      </div>
+      <RequestInfo request={selectedRequest} />
 
       
     </div>

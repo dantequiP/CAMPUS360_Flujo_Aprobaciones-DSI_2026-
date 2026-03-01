@@ -98,10 +98,6 @@ def derivar_solicitud(db: Session, solicitud_id: int, payload: DerivacionInput):
     if solicitud.estado_id not in estados_validos:
         raise Exception("Conflicto: Solo se pueden evaluar solicitudes en estado PENDIENTE u OBSERVADO.")
 
-    # Validación Estricta: Solo el Secretario puede evaluar lo que está PENDIENTE
-    #if solicitud.estado_id != estado_pendiente.idEstado:
-    #    raise Exception("Conflicto: Solo se pueden evaluar solicitudes en estado PENDIENTE.")
-
     # --- BIFURCACIÓN DEL FLUJO DEL SECRETARIO ---
     if payload.checklist_valido:
         # Camino Feliz: Todo conforme, pasa al Jefe
