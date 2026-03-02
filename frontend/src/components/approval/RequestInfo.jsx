@@ -16,7 +16,7 @@ const RequestInfo = ({ request }) => {
 
         <div className="info-card">
           <label>Solicitante</label>
-          <p>{request.alumno || request.solicitante}</p>
+          <p>{request.alumno || request.solicitante || "Usuario UNMSM"}</p>
         </div>
 
         <div className="info-card">
@@ -35,8 +35,9 @@ const RequestInfo = ({ request }) => {
 
       <div className="description-section">
         <label>Descripción / Motivo del Trámite</label>
-        <div className="motive-box">
-          {request.motivo || "Solicitud tramitada según normativa vigente de la UNMSM - FISI."}
+        <div className="motive-box" style={{ whiteSpace: 'pre-wrap' }}>
+          {/* CAMBIO CLAVE: Usamos 'descripcion' que es el nombre en MySQL/FastAPI */}
+          {request.descripcion || "El alumno no proporcionó una descripción detallada para este trámite."}
         </div>
       </div>
     </div>

@@ -6,8 +6,7 @@ from app.domain.models import Solicitud, Estado, HistorialDecision, LogAuditoria
 from app.domain.enums import EstadoSolicitud
 from app.services.solicitud_factory import SolicitudFactory
 
-def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
-    """Crea una solicitud delegando el ensamblaje y SLA al Patrón Factory."""
+def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str, descripcion: str): 
     
     estado_inicial = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.PENDIENTE).first()
     
@@ -17,6 +16,7 @@ def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
     nueva_solicitud = SolicitudFactory.crear_solicitud(
         tipo_tramite=tipo_tramite,
         solicitante=solicitante,
+        descripcion=descripcion,
         estado_inicial_id=estado_inicial.idEstado
     )
     

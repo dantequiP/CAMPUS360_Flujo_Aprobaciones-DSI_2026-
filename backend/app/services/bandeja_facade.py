@@ -26,7 +26,8 @@ class BandejaAprobacionFacade:
                 tipo_tramite=sol.tipoSolicitud,
                 estado=sol.estado_actual.tipoEstado,
                 prioridad=sol.prioridad,
-                semaforo_sla=semaforo
+                semaforo_sla=semaforo,
+                descripcion=sol.descripcion
             )
             dto_list.append(dto)
 

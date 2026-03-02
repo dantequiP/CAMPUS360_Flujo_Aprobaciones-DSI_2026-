@@ -1,5 +1,19 @@
 import { API_CONFIG, ROLES, ACTIONS } from '../constants/appConstants';
 
+/* =========================================================
+   CAPA DE INFRAESTRUCTURA: approvalService.js
+   =========================================================
+   Descripción:
+   Centraliza todas las interacciones con el backend (FastAPI + SQLite).
+
+   Funcionalidad:
+   - Gestiona peticiones asíncronas.
+   - Lista solicitudes pendientes.
+   - Registra veredictos técnicos.
+   - Consulta la bitácora histórica.
+
+*/
+
 export const approvalService = {
   // GET: Obtener lista de pendientes [cite: 83]
   getPendingApprovals: async () => {

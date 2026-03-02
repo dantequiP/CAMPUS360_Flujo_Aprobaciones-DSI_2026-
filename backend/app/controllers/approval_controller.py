@@ -125,20 +125,28 @@ def ver_detalle_solicitud(id: int, db: Session = Depends(get_db)):
 # ENDPOINT TEMPORAL PARA PRUEBAS (FACTORY + STRATEGY)
 # ---------------------------------------------------------
 @router.post("/approvals/test-seed")
-def crear_solicitud_prueba(tipo_tramite: str = "Rectificación de Nota", alumno: str = "Gustavo", db: Session = Depends(get_db)):
-    """Crea una solicitud de prueba para verificar los patrones Creacional y de Comportamiento."""
+def crear_solicitud_prueba(
+    tipo_tramite: str = "Rectificación de Nota", 
+    alumno: str = "Gustavo", 
+    descripcion: str = "Sustento del alumno",
+    db: Session = Depends(get_db)
+):
+    """Crea una solicitud de prueba incluyendo la descripción técnica (Fase de Simulación)."""
     try:
-        # Esto disparará el Factory y el Strategy internamente
         nueva_solicitud = solicitud_repository.crear_solicitud(
             db=db, 
             tipo_tramite=tipo_tramite, 
-            solicitante=alumno
+            solicitante=alumno,
+            descripcion=descripcion
         )
+        
         return {
             "mensaje": "¡Solicitud creada en MySQL exitosamente!", 
             "id_generado": nueva_solicitud.idSolicitud,
-            "prioridad_asignada": nueva_solicitud.prioridad, # Debería decir ALTA si es urgente
-            "estado": nueva_solicitud.estado_actual.tipoEstado
+            "prioridad_asignada": nueva_solicitud.prioridad,
+            "estado": nueva_solicitud.estado_actual.tipoEstado,
+            "descripcion_registrada": nueva_solicitud.descripcion # 3. CONFIRMACIÓN EN EL JSON
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Si algo falla en la Factory o BD, aquí verás el detalle
+        raise HTTPException(status_code=500, detail=f"Error en el flujo G4: {str(e)}")

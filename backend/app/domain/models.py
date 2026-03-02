@@ -20,6 +20,7 @@ class Solicitud(Base):
 
     idSolicitud = Column(Integer, primary_key=True, autoincrement=True)
     tipoSolicitud = Column(String(100), nullable=False)
+    descripcion = Column(String(1000), nullable=True) # NUEVO ATRIBUTO: ALTER TABLE solicitudes ADD COLUMN descripcion VARCHAR(1000);
     fechaCreacion = Column(DateTime, default=datetime.now)
     prioridad = Column(String(20), default="NORMAL")
     slaObjetivo = Column(DateTime, nullable=False)

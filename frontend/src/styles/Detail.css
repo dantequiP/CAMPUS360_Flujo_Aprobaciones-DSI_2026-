@@ -1,156 +1,20 @@
+/* --- 1. LAYOUT Y CONTENEDORES PRINCIPALES --- */
 .detail-container {
   background: #f9fafb;
   padding: 24px;
   border-radius: 8px;
 }
 
-.detail-header {
+.detail-header, .detail-header-top {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.detail-header {
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 16px;
-}
-
-.tag-status { background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-.tag-priority { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-
-.btn-approve { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-.btn-reject { color: #ef4444; border: 1px solid #ef4444; background: none; padding: 8px 16px; border-radius: 6px; margin-right: 8px; }
-.btn-observe { color: #f59e0b; border: 1px solid #f59e0b; background: none; padding: 8px 16px; border-radius: 6px; margin-right: 8px; }
-
-.observation-alert {
-  background: #fffbeb;
-  border: 1px solid #fef3c7;
-  padding: 16px;
-  margin: 20px 0;
-  border-radius: 8px;
-}
-
-/* Capa oscura de fondo */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Oscurece el fondo */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-/* Caja del modal */
-.modal-content {
-  background: white;
-  padding: 30px;
-  border-radius: 12px;
-  width: 500px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.modal-content h3 { margin: 0; color: #111827; }
-
-.modal-content textarea {
-  width: 100%;
-  height: 120px;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  resize: none;
-  font-family: inherit;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.btn-confirm {
-  background: #2563eb; /* Azul profesional */
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn-confirm:disabled {
-  background: #93c5fd;
-  cursor: not-allowed;
-}
-
-.approval-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 20px;
-}
-
-.approval-table th, .approval-table td {
-  padding: 15px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.approval-table th { background-color: #f8fafc; color: #64748b; }
-
-.tag.NORMAL { color: #0ea5e9; background: #e0f2fe; padding: 4px 8px; border-radius: 4px; }
-.tag.ALTA { color: #ef4444; background: #fee2e2; padding: 4px 8px; border-radius: 4px; }
-
-/* Contenedor tipo ERP para los datos */
-.request-data-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Dos columnas como en tu boceto */
-  gap: 25px;
-  padding: 20px;
-  background-color: #ffffff;
-  border-radius: 8px;
-}
-
-.data-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-/* Estilo de la etiqueta pequeña y gris */
-.data-item label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-}
-
-/* Estilo del valor en negrita y más grande */
-.data-item p {
-  font-size: 0.95rem;
-  color: #1e293b;
-  margin: 0;
-  font-weight: 500;
-}
-
-/* Para que la descripción ocupe todo el ancho */
-.full-width {
-  grid-column: span 2;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 15px;
-}
-
-/* Cabecera superior */
-.detail-header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 25px;
 }
 
 .id-status-row {
@@ -162,290 +26,173 @@
 
 .request-id { font-size: 1.5rem; font-weight: bold; color: #1e293b; }
 
-/* Cuadro de observación amarillo */
-.observation-box {
-  background-color: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 30px;
+/* --- 2. COMPONENTES: ETIQUETAS (TAGS) --- */
+.tag-status, .tag-priority, .tag.NORMAL, .tag.ALTA {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
-.obs-header { color: #92400e; display: flex; gap: 8px; margin-bottom: 8px; }
-.obs-footer { font-size: 0.75rem; color: #b45309; }
+.tag-status { background: #fef3c7; color: #92400e; }
+.tag-priority { background: #fee2e2; color: #991b1b; }
+.tag.NORMAL { color: #0ea5e9; background: #e0f2fe; }
+.tag.ALTA { color: #ef4444; background: #fee2e2; }
 
-/* Tabs */
-.detail-tabs {
-  display: flex;
-  gap: 10px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 25px;
-  margin-top: 20px; /* Añade esto para compensar el cuadro que quitamos */
-}
-
-.tab-btn {
-  padding: 10px 15px;
-  border: none;
-  background: none;
+/* --- 3. COMPONENTES: BOTONES (BASE Y VARIANTES) --- */
+.btn-approve, .btn-reject, .btn-observe, .btn-confirm, 
+.btn-action, .btn-back, .btn-main, .btn-action-main {
   cursor: pointer;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.tab-btn.active {
-  color: #1e293b;
-  border-bottom: 2px solid #1e293b;
-}
-
-/* Grilla de datos */
-.request-data-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-top: 20px;
-}
-
-.data-item label {
-  font-size: 0.8rem;
-  color: #64748b;
-  display: block;
-  margin-bottom: 4px;
-}
-.data-item p { font-weight: 500; color: #1e293b; margin: 0; }
-
-/* Contenedor de acciones en la cabecera */
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-
-/* Base de los botones de acción */
-.btn-action {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-}
-
-/* Botón Observar (Naranja/Amarillo) */
-.btn-action.observe {
-  background-color: #fffbeb;
-  color: #d97706;
-  border-color: #fcd34d;
-}
-.btn-action.observe:hover {
-  background-color: #fef3c7;
-  transform: translateY(-2px);
-}
-
-/* Botón Rechazar (Rojo) */
-.btn-action.reject {
-  background-color: #fef2f2;
-  color: #dc2626;
-  border-color: #fecaca;
-}
-.btn-action.reject:hover {
-  background-color: #fee2e2;
-  transform: translateY(-2px);
-}
-
-/* Botón Aprobar (Verde Institucional) */
-.btn-action.approve {
-  background-color: #10b981; /* Verde esmeralda */
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
-}
-.btn-action.approve:hover {
-  background-color: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
-}
-
-/* Botón "Volver" (Estilo discreto) */
-.btn-back {
-  background: white;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-bottom: 15px;
-  cursor: pointer;
-}
-.btn-back:hover {
-  background-color: #f8fafc;
-  color: #1e293b;
-}
-
-/* Botón Morado de Secretaría según image_4c00b9.png */
-.btn-action.forward-n1 {
-  background-color: #6366f1; /* Morado Indigo */
-  color: white;
-  border: none;
-  box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
-}
-
-.btn-action.forward-n1:hover {
-  background-color: #4f46e5;
-  transform: translateY(-2px);
-}
-
-/* Contenedor del Panel de Decisiones */
-.decision-panel-g4 {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 24px;
-  margin: 20px 0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.decision-panel-g4 h3 {
-  color: #1e293b;
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Estilo de la Caja de Comentarios */
-.comment-input {
-  width: 100%;
-  min-height: 100px;
-  padding: 12px;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.95rem;
-  margin-bottom: 15px;
-  resize: vertical;
-  transition: border-color 0.2s;
-}
-
-.comment-input:focus {
-  outline: none;
-  border-color: #6366f1; /* Morado de la marca */
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-/* Grupo de Botones */
-.action-buttons-group {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.btn-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-/* Colores Dinámicos */
-.btn-main.approve { background-color: #10b981; color: white; }
-.btn-main.observe { background-color: #f59e0b; color: white; }
-.btn-main.reject { background-color: #ef4444; color: white; }
-
-/* Efecto cuando está DESHABILITADO */
-.btn-main:disabled {
-  background-color: #cbd5e1;
-  color: #94a3b8;
-  cursor: not-allowed; /* Como dijiste, no cambia la forma pero avisa visualmente */
-  opacity: 0.7;
-}
-
-.helper-text {
-  font-size: 0.8rem;
-  color: #ef4444;
-  margin-top: 10px;
-  font-weight: 500;
-}
-
-/* 1. El Fondo Oscuro (Overlay) */
-.modal-overlay-g4 {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(15, 23, 42, 0.6); /* Color pizarra traslúcido */
-  backdrop-filter: blur(4px); /* Desenfoque profesional */
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* Siempre por encima de todo */
-}
-
-/* 2. La Ventana de Decisión */
-.decision-window-g4 {
-  background-color: #ffffff;
-  width: 550px;
-  border-radius: 16px;
-  padding: 30px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: slideUp 0.3s ease-out; /* Animación de entrada */
-}
-
-/* 3. Cabecera de la Ventana */
-.window-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 15px;
-}
-
-.window-header h3 {
-  margin: 0;
-  color: #1e293b;
-  font-size: 1.25rem;
-}
-
-.btn-close {
-  background: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
   border: none;
-  font-size: 1.8rem;
-  color: #94a3b8;
-  cursor: pointer;
-  line-height: 1;
 }
 
-.btn-close:hover { color: #ef4444; }
-
-/* 4. El Botón Principal en el Header del Detalle */
-.btn-action-main {
-  background-color: #6366f1; /* Morado G4 */
+/* Botón de Gestión (El más grande) */
+.btn-action-main, .btn-action.forward-n1 {
+  background-color: #6366f1;
   color: white;
-  padding: 12px 24px;
-  border-radius: 10px;
+  padding: 14px 28px; 
+  font-size: 1rem;
   font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+  border-radius: 10px;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+  gap: 10px;
 }
 
 .btn-action-main:hover {
   background-color: #4f46e5;
   transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
 }
 
-/* Animación simple */
+/* Botones de acción del Modal */
+.action-buttons-group {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-main {
+  flex: 1; /* Misma anchura para los tres */
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.btn-main.approve { background-color: #10b981; color: white; }
+.btn-main.observe { background-color: #f59e0b; color: white; }
+.btn-main.reject  { background-color: #ef4444; color: white; }
+
+.btn-main:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.9; }
+
+.btn-main:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
+
+.btn-back {
+  background: white; border: 1px solid #e2e8f0; color: #64748b;
+  padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;
+}
+
+/* --- 4. GRIDS Y DATOS --- */
+.request-data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.data-item label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.data-item p { font-size: 0.95rem; color: #1e293b; font-weight: 500; margin: 0; }
+
+.full-width { grid-column: span 2; border-top: 1px solid #f1f5f9; padding-top: 15px; }
+
+/* --- 5. MODALES (VENTANA DE DECISIÓN) --- */
+.modal-overlay, .modal-overlay-g4 {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.decision-window-g4 {
+  background: white;
+  width: 550px;
+  padding: 30px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease-out;
+}
+
+.window-header {
+  display: flex;
+  justify-content: space-between; /* X a la derecha */
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 15px;
+}
+
+.btn-close {
+  background: #f1f5f9;
+  color: #64748b;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+}
+
+.btn-close:hover { background: #fee2e2; color: #ef4444; }
+
+.comment-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 15px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.comment-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+
+/* --- 6. OTROS ELEMENTOS --- */
+.observation-box {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.detail-tabs {
+  display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0;
+  margin: 20px 0 25px 0;
+}
+
+.tab-btn {
+  padding: 10px 15px; background: none; color: #64748b; font-weight: 500;
+}
+
+.tab-btn.active { color: #1e293b; border-bottom: 2px solid #1e293b; }
+
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }

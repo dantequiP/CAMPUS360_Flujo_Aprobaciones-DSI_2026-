@@ -13,9 +13,16 @@ class SolicitudDTO(BaseModel):
     estado: str          # Mapeado desde la relación con 'Estado'
     prioridad: str       # Calculada por la Estrategia (ALTA/NORMAL)
     semaforo_sla: str    # Indicador visual de urgencia (ROJO/VERDE)
-
+    descripcion: Optional[str] = "Sin descripción" 
+    
     class Config:
         from_attributes = True # Permite a Pydantic leer datos directamente de modelos SQLAlchemy
+
+class SolicitudCreateInput(BaseModel):
+    """Payload el alumno registra su solicitud inicial."""
+    tipo_tramite: str
+    solicitante: str
+    descripcion: str
 
 
 # --- PETICIONES (INPUTS) ---
