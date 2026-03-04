@@ -1,13 +1,21 @@
+"""
+Capa de Infraestructura: Repositorios (Repository Pattern).
+Abstrae las consultas SQL y la persistencia del ORM. Centraliza las operaciones
+de la base de datos y garantiza la Integridad Transaccional (propiedades ACID).
+"""
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.domain.schemas import DerivacionInput
-# Importamos los nuevos modelos relacionales
+
 from app.domain.models import Solicitud, Estado, HistorialDecision, LogAuditoria
 from app.domain.enums import EstadoSolicitud
 from app.services.solicitud_factory import SolicitudFactory
 
 def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str, descripcion: str): 
-    
+    """
+    Persiste una nueva solicitud integrando Inversión de Dependencias (DIP).
+    Recibe la estrategia resuelta para no violar el principio Abierto/Cerrado (OCP).
+    """
     estado_inicial = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.PENDIENTE).first()
     
     if not estado_inicial:
@@ -43,7 +51,10 @@ def listar_solicitudes_por_aprobar(db: Session):
 
 
 def actualizar_estado(db: Session, solicitud_id: int, nuevo_estado_str: str, comentario: str):
-    """Actualiza el estado de una solicitud y guarda el log en sus tablas correspondientes."""
+    """
+    Ejecuta el dictamen final. Garantiza la Integridad Transaccional al actualizar 
+    la entidad, el historial y la auditoría en una única transacción atómica.
+    """
     
     # 1. Buscamos la solicitud en MySQL
     solicitud = db.query(Solicitud).filter(Solicitud.idSolicitud == solicitud_id).first()
@@ -83,7 +94,11 @@ def actualizar_estado(db: Session, solicitud_id: int, nuevo_estado_str: str, com
     return solicitud
 
 def derivar_solicitud(db: Session, solicitud_id: int, payload: DerivacionInput):
-    """RN-06: El Secretario evalúa la solicitud PENDIENTE (Deriva u Observa)."""
+    
+    """
+    Transición técnica (RN-06). Bifurca el flujo del Secretario hacia Jefatura 
+    (Camino Feliz) o devuelve la solicitud al alumno (Flujo Alterno).
+    """
     solicitud = db.query(Solicitud).filter(Solicitud.idSolicitud == solicitud_id).first()
     if not solicitud:
         return None

@@ -1,10 +1,15 @@
+"""
+Capa de Infraestructura: Inicializador de Datos (Seeder).
+Automatiza la creación de los registros paramétricos indispensables 
+para el funcionamiento de la Máquina de Estados (RN-06).
+"""
 from sqlalchemy.orm import Session
 from app.domain.models import Estado
 
 def inicializar_estados(db: Session):
     """
-    Verifica si los estados base existen. Si no, los crea.
-    Esto es el 'Seeder' de nuestra base de datos.
+    Puebla la tabla 'estados' con el catálogo oficial si se encuentra vacía.
+    Garantiza que el motor de base de datos esté listo para transaccionar solicitudes.
     """
     estados_base = ["PENDIENTE", "POR_APROBAR", "APROBADO", "OBSERVADO", "RECHAZADO"]
     
