@@ -15,10 +15,8 @@ def test_crear_solicitud_extemporanea_prioridad_alta_y_sla_24h():
     margen_error = 5 # segundos
     esperado_sla = datetime.now() + timedelta(hours=24)
 
-    # Act (Actuar)
     nueva_solicitud = SolicitudFactory.crear_solicitud(tipo_tramite, solicitante, estado_id)
 
-    # Assert (Afirmar)
     # 1. Verificamos que la prioridad sea ALTA
     assert nueva_solicitud.prioridad == "ALTA"
     
@@ -30,7 +28,7 @@ def test_crear_solicitud_extemporanea_prioridad_alta_y_sla_24h():
     assert nueva_solicitud.tipoSolicitud == tipo_tramite
     assert nueva_solicitud.solicitante == solicitante
 
-
+#-------------------------------------------------------
 ##prueba unitaria 6
 def test_factory_crea_tramite_regular_con_prioridad_normal_y_sla_72h():
     

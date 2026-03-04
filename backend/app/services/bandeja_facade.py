@@ -1,3 +1,8 @@
+"""
+Capa de Servicios: Lógica de Orquestación.
+Aplica el Patrón Estructural Facade para encapsular reglas de negocio complejas,
+liberando a los controladores (Capa API) de responsabilidades de transformación de datos (SRP).
+"""
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.repositories import solicitud_repository
@@ -5,14 +10,18 @@ from app.domain.schemas import SolicitudDTO
 
 class BandejaAprobacionFacade:
     """
-    Fachada que simplifica la lógica compleja de obtener, clasificar 
-    y ordenar la bandeja de pendientes del Aprobador.
+    Patrón Facade: Oculta la complejidad de interactuar con repositorios, 
+    mapear entidades ORM a DTOs y calcular métricas dinámicas operativas (SLA).
     """
     def __init__(self, db: Session):
         self.db = db
 
     def obtener_bandeja_ordenada(self) -> list[SolicitudDTO]:
         # 1. Obtener datos crudos del repositorio
+        """
+        Orquesta la construcción de la bandeja. Aplica reglas de ordenamiento 
+        del negocio: Prioridad estricta y control de vencimiento de SLA (Semáforo).
+        """
         solicitudes_db = solicitud_repository.listar_solicitudes_por_aprobar(self.db)
         
         # 2. Mapear a DTOs y calcular Semáforo

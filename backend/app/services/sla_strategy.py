@@ -1,8 +1,17 @@
+"""
+Capa de Servicios: Lógica de Comportamiento (Strategy Pattern).
+Aplica el Patrón Strategy para el cálculo dinámico de Acuerdos de Nivel 
+de Servicio (SLA) y prioridades. Garantiza el principio Abierto/Cerrado (OCP).
+"""
 from datetime import datetime, timedelta
 from abc import ABC, abstractmethod
 
 # 1. La Interfaz (Clase Base)
 class SlaStrategy(ABC):
+    """
+    Contrato base (Interfaz). Define la familia de algoritmos 
+    intercambiables para el cálculo de SLAs operativos.
+    """
     @abstractmethod
     def calcular_sla(self) -> datetime:
         pass

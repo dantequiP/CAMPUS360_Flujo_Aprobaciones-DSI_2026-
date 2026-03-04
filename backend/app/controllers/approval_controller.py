@@ -1,3 +1,8 @@
+"""
+Capa de Presentación: Controladores API (API Layer)
+Orquesta las peticiones HTTP y mapea los Casos de Uso (CU) del sistema, 
+delegando la lógica de negocio a la Capa de Servicios para cumplir con SOLID (SRP).
+"""
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
@@ -11,24 +16,27 @@ from app.repositories import solicitud_repository
 
 router = APIRouter()
 
-# ---------------------------------------------------------
-# CU-01: Listar Bandeja de Pendientes (USANDO FACADE)
-# ---------------------------------------------------------
+
 @router.get("/approvals/pending", response_model=List[SolicitudDTO])
 def listar_pendientes(db: Session = Depends(get_db)):
-    """Recupera la bandeja real ordenada por prioridad y SLA."""
-    # Instanciamos nuestra Fachada y le pedimos la lista ya procesada
+    """
+    CU-01: Listar Bandeja de Pendientes.
+    Patrón Estructural: Utiliza BandejaAprobacionFacade para encapsular la lógica 
+    compleja de ordenamiento por SLA y cálculo del semáforo.
+    """
     fachada = BandejaAprobacionFacade(db)
     return fachada.obtener_bandeja_ordenada()
 
 
-# ---------------------------------------------------------
-# CU-02: Registrar Dictamen (Aprobar/Rechazar)
-# ---------------------------------------------------------
+
 @router.post("/approvals/{id}/verdict")
 def registrar_dictamen(id: int, payload: DictamenInput, db: Session = Depends(get_db)):
-    """Procesa la decisión final y la guarda físicamente en MySQL."""
     
+    """
+    CU-02: Registrar Dictamen (Aprobar/Rechazar).
+    Ejecuta el cambio de estado definitivo. El payload (DictamenInput) impone 
+    el cumplimiento de la RN-03 (Comentario obligatorio) mediante Pydantic.
+    """
     if payload.decision not in ["APROBADO", "RECHAZADO", "OBSERVADO"]:
         raise HTTPException(status_code=400, detail="Estado no válido")
     
@@ -53,12 +61,13 @@ def registrar_dictamen(id: int, payload: DictamenInput, db: Session = Depends(ge
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ---------------------------------------------------------
-# CU-03: Consultar Historial de Decisiones
-# ---------------------------------------------------------
 @router.get("/approvals/history")
 def consultar_historial(db: Session = Depends(get_db)):
-    """Lista las solicitudes previamente atendidas (Aprobadas, Rechazadas, Observadas)."""
+    
+    """
+    CU-03: Consultar Historial de Decisiones.
+    Recupera y formatea las solicitudes que ya han alcanzado un estado resolutivo.
+    """
     solicitudes_historicas = solicitud_repository.consultar_historial(db)
     
     # Formateamos la salida rápidamente 
@@ -74,12 +83,15 @@ def consultar_historial(db: Session = Depends(get_db)):
     ]
 
 
-# ---------------------------------------------------------
-# CU-04: Evaluar Solicitud (Exclusivo Secretario)
-# ---------------------------------------------------------
+
 @router.post("/workflow/{id}/escalate")
 def evaluar_secretaria(id: int, payload: DerivacionInput, db: Session = Depends(get_db)):
-    """Secretario revisa requisitos: Deriva (POR APROBAR) u Observa (OBSERVADO)."""
+
+    """
+    CU-04: Evaluar Solicitud (Derivar a Jefatura).
+    Exclusivo para el perfil 'Secretario'. Transiciona una solicitud PENDIENTE 
+    aplicando la regla RN-06 y RN-03 mediante el DTO DerivacionInput.
+    """
     try:
         solicitud = solicitud_repository.derivar_solicitud(db, id, payload)
         if not solicitud:
@@ -95,12 +107,15 @@ def evaluar_secretaria(id: int, payload: DerivacionInput, db: Session = Depends(
         raise HTTPException(status_code=409, detail=str(e))
 
 
-# ---------------------------------------------------------
-# CU-05: Ver Detalle Consolidado
-# ---------------------------------------------------------
+
 @router.get("/approvals/{id}/detail")
 def ver_detalle_solicitud(id: int, db: Session = Depends(get_db)):
-    """Obtiene la información detallada de una solicitud específica y su auditoría."""
+    
+    """
+    CU-05: Ver Detalle Consolidado.
+    Recupera la entidad Solicitud junto con sus relaciones ORM 
+    (Historial y Auditoría) de forma consolidada.
+    """
     solicitud = solicitud_repository.obtener_detalle(db, id)
     if not solicitud:
         raise HTTPException(status_code=404, detail="Solicitud no encontrada.")
@@ -121,9 +136,7 @@ def ver_detalle_solicitud(id: int, db: Session = Depends(get_db)):
     }
 
 
-# ---------------------------------------------------------
-# ENDPOINT TEMPORAL PARA PRUEBAS (FACTORY + STRATEGY)
-# ---------------------------------------------------------
+
 @router.post("/approvals/test-seed")
 def crear_solicitud_prueba(
     tipo_tramite: str = "Rectificación de Nota", 
@@ -131,7 +144,10 @@ def crear_solicitud_prueba(
     descripcion: str = "Sustento del alumno",
     db: Session = Depends(get_db)
 ):
-    """Crea una solicitud de prueba incluyendo la descripción técnica (Fase de Simulación)."""
+    """
+    Endpoint de Utilidad: Crea datos de prueba demostrando el uso de los 
+    patrones Factory (Creacional) y Strategy (Comportamiento) aplicados a la persistencia.
+    """
     try:
         nueva_solicitud = solicitud_repository.crear_solicitud(
             db=db, 
