@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from app.controllers.approval_controller import router as approval_router
 from app.config.database import engine, SessionLocal
@@ -25,3 +26,11 @@ app.include_router(approval_router, prefix="/api/v1")
 @app.get("/")
 def home():
     return {"mensaje": "API Operativa - MySQL Conectado"}
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173","http://127.0.0.1:5173"], # URL de tu frontend en Vite
+    allow_credentials=True,
+    allow_methods=["*"], # Permite todos los métodos (GET, POST, etc.)
+    allow_headers=["*"], # Permite todas las cabeceras
+)

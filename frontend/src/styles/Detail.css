@@ -1,0 +1,199 @@
+/* --- 1. LAYOUT Y CONTENEDORES PRINCIPALES --- */
+.detail-container {
+  background: #f9fafb;
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.detail-header, .detail-header-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.detail-header {
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
+}
+
+.id-status-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.request-id { font-size: 1.5rem; font-weight: bold; color: #1e293b; }
+
+/* --- 2. COMPONENTES: ETIQUETAS (TAGS) --- */
+.tag-status, .tag-priority, .tag.NORMAL, .tag.ALTA {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.tag-status { background: #fef3c7; color: #92400e; }
+.tag-priority { background: #fee2e2; color: #991b1b; }
+.tag.NORMAL { color: #0ea5e9; background: #e0f2fe; }
+.tag.ALTA { color: #ef4444; background: #fee2e2; }
+
+/* --- 3. COMPONENTES: BOTONES (BASE Y VARIANTES) --- */
+.btn-approve, .btn-reject, .btn-observe, .btn-confirm, 
+.btn-action, .btn-back, .btn-main, .btn-action-main {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  border: none;
+}
+
+/* Botón de Gestión (El más grande) */
+.btn-action-main, .btn-action.forward-n1 {
+  background-color: #6366f1;
+  color: white;
+  padding: 14px 28px; 
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+  gap: 10px;
+}
+
+.btn-action-main:hover {
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
+}
+
+/* Botones de acción del Modal */
+.action-buttons-group {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-main {
+  flex: 1; /* Misma anchura para los tres */
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.btn-main.approve { background-color: #10b981; color: white; }
+.btn-main.observe { background-color: #f59e0b; color: white; }
+.btn-main.reject  { background-color: #ef4444; color: white; }
+
+.btn-main:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.9; }
+
+.btn-main:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
+
+.btn-back {
+  background: white; border: 1px solid #e2e8f0; color: #64748b;
+  padding: 6px 12px; border-radius: 6px; font-size: 0.85rem;
+}
+
+/* --- 4. GRIDS Y DATOS --- */
+.request-data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.data-item label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.data-item p { font-size: 0.95rem; color: #1e293b; font-weight: 500; margin: 0; }
+
+.full-width { grid-column: span 2; border-top: 1px solid #f1f5f9; padding-top: 15px; }
+
+/* --- 5. MODALES (VENTANA DE DECISIÓN) --- */
+.modal-overlay, .modal-overlay-g4 {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.decision-window-g4 {
+  background: white;
+  width: 550px;
+  padding: 30px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease-out;
+}
+
+.window-header {
+  display: flex;
+  justify-content: space-between; /* X a la derecha */
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 15px;
+}
+
+.btn-close {
+  background: #f1f5f9;
+  color: #64748b;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+}
+
+.btn-close:hover { background: #fee2e2; color: #ef4444; }
+
+.comment-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 15px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.comment-input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+
+/* --- 6. OTROS ELEMENTOS --- */
+.observation-box {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.detail-tabs {
+  display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0;
+  margin: 20px 0 25px 0;
+}
+
+.tab-btn {
+  padding: 10px 15px; background: none; color: #64748b; font-weight: 500;
+}
+
+.tab-btn.active { color: #1e293b; border-bottom: 2px solid #1e293b; }
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

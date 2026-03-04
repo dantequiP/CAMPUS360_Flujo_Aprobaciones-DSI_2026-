@@ -1,14 +1,21 @@
+"""
+Capa de Infraestructura: Repositorios (Repository Pattern).
+Abstrae las consultas SQL y la persistencia del ORM. Centraliza las operaciones
+de la base de datos y garantiza la Integridad Transaccional (propiedades ACID).
+"""
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.domain.schemas import DerivacionInput
-# Importamos los nuevos modelos relacionales
+
 from app.domain.models import Solicitud, Estado, HistorialDecision, LogAuditoria
 from app.domain.enums import EstadoSolicitud
 from app.services.solicitud_factory import SolicitudFactory
 
-def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
-    """Crea una solicitud delegando el ensamblaje y SLA al Patrón Factory."""
-    
+def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str, descripcion: str): 
+    """
+    Persiste una nueva solicitud integrando Inversión de Dependencias (DIP).
+    Recibe la estrategia resuelta para no violar el principio Abierto/Cerrado (OCP).
+    """
     estado_inicial = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.PENDIENTE).first()
     
     if not estado_inicial:
@@ -17,6 +24,7 @@ def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
     nueva_solicitud = SolicitudFactory.crear_solicitud(
         tipo_tramite=tipo_tramite,
         solicitante=solicitante,
+        descripcion=descripcion,
         estado_inicial_id=estado_inicial.idEstado
     )
     
@@ -28,14 +36,25 @@ def crear_solicitud(db: Session, tipo_tramite: str, solicitante: str):
 
 
 def listar_solicitudes_por_aprobar(db: Session):
-    """Obtiene todas las solicitudes que están en la bandeja del Aprobador."""
+    """Obtiene solicitudes para la bandeja general (Pendientes, Por Aprobar y Observados)."""
     
-    estado_por_aprobar = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.POR_APROBAR).first()
-    return db.query(Solicitud).filter(Solicitud.estado_id == estado_por_aprobar.idEstado).all()
+    estados_requeridos = [
+        "PENDIENTE", 
+        "POR_APROBAR", 
+        "OBSERVADO"
+    ]
+
+    objetos_estado = db.query(Estado).filter(Estado.tipoEstado.in_(estados_requeridos)).all()
+    ids_validos = [e.idEstado for e in objetos_estado]
+    
+    return db.query(Solicitud).filter(Solicitud.estado_id.in_(ids_validos)).all()
 
 
 def actualizar_estado(db: Session, solicitud_id: int, nuevo_estado_str: str, comentario: str):
-    """Actualiza el estado de una solicitud y guarda el log en sus tablas correspondientes."""
+    """
+    Ejecuta el dictamen final. Garantiza la Integridad Transaccional al actualizar 
+    la entidad, el historial y la auditoría en una única transacción atómica.
+    """
     
     # 1. Buscamos la solicitud en MySQL
     solicitud = db.query(Solicitud).filter(Solicitud.idSolicitud == solicitud_id).first()
@@ -75,16 +94,24 @@ def actualizar_estado(db: Session, solicitud_id: int, nuevo_estado_str: str, com
     return solicitud
 
 def derivar_solicitud(db: Session, solicitud_id: int, payload: DerivacionInput):
-    """RN-06: El Secretario evalúa la solicitud PENDIENTE (Deriva u Observa)."""
+    
+    """
+    Transición técnica (RN-06). Bifurca el flujo del Secretario hacia Jefatura 
+    (Camino Feliz) o devuelve la solicitud al alumno (Flujo Alterno).
+    """
     solicitud = db.query(Solicitud).filter(Solicitud.idSolicitud == solicitud_id).first()
     if not solicitud:
         return None
 
     estado_pendiente = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.PENDIENTE).first()
+    estado_observado = db.query(Estado).filter(Estado.tipoEstado == EstadoSolicitud.OBSERVADO).first()
     
-    # Validación Estricta: Solo el Secretario puede evaluar lo que está PENDIENTE
-    if solicitud.estado_id != estado_pendiente.idEstado:
-        raise Exception("Conflicto: Solo se pueden evaluar solicitudes en estado PENDIENTE.")
+    # 2. CREAMOS LA LISTA DE PERMITIDOS
+    estados_validos = [estado_pendiente.idEstado, estado_observado.idEstado]
+    
+    # 3. CAMBIO CLAVE: Ahora permitimos PENDIENTE u OBSERVADO
+    if solicitud.estado_id not in estados_validos:
+        raise Exception("Conflicto: Solo se pueden evaluar solicitudes en estado PENDIENTE u OBSERVADO.")
 
     # --- BIFURCACIÓN DEL FLUJO DEL SECRETARIO ---
     if payload.checklist_valido:

@@ -1,0 +1,164 @@
+.layout-container {
+  display: flex; /* ACTIVAMOS FLEXBOX */
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+/* Sidebar Principal */
+.sidebar {
+  width: 260px;
+  height: 100vh; /* Ocupa todo el alto de la pantalla */
+  background-color: #ffffff;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 20px;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar-nav {
+  flex-grow: 1; 
+  margin-top: 40px;
+}
+
+/* Logo Section */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px 30px 10px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  background: #eff6ff;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.sidebar-logo h2 { font-size: 1.25rem; margin: 0; color: #1e293b; }
+.sidebar-logo span { font-size: 0.75rem; color: #64748b; font-weight: bold; }
+
+/* Navegación */
+.sidebar-nav ul { list-style: none; padding: 0; }
+
+.sidebar-nav li {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #71717a; /* Gris más suave para no cansar la vista */
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-icon { font-size: 1.2rem; }
+
+/* Estado Activo: Ahora tiene una pequeña barra a la izquierda */
+.sidebar-nav li.active {
+  background-color: #5d51e8; /* Tu morado/azul de la captura */
+  color: white;
+}
+
+.sidebar-nav li:hover:not(.active) {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+
+.sidebar-footer {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20px;
+}
+
+.profile-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+}
+
+.profile-img {
+  width: 38px;
+  height: 38px;
+  background: #5d51e8;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Perfil de Usuario */
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  background: #4f46e5;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.profile-text { display: flex; flex-direction: column; }
+.profile-text strong { font-size: 0.9rem; color: #18181b; }
+.profile-text span { font-size: 0.75rem; color: #71717a; }
+
+.main-content {
+  flex-grow: 1; /* Esto hace que el contenido ocupe todo el resto del espacio */
+  padding: 40px;
+  overflow-y: auto; /* Si el contenido es largo, permite hacer scroll solo ahí */
+}
+
+.portal-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+}
+
+.portal-header { text-align: center; margin-bottom: 40px; }
+.portal-header h1 { color: #1e293b; font-size: 2.5rem; }
+
+.portal-cards { display: flex; gap: 30px; }
+
+.portal-card {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  width: 300px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.portal-card:hover {
+  transform: translateY(-10px);
+  border-color: #6366f1;
+}
+
+.card-icon { font-size: 4rem; margin-bottom: 20px; }
+.portal-card h2 { color: #1e293b; margin-bottom: 10px; }
+.portal-card span { color: #64748b; font-weight: bold; }
